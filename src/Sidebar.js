@@ -4,23 +4,29 @@ import { DonutLarge, Chat, MoreVert, SearchOutlined } from '@material-ui/icons';
 import './Sidebar.css';
 import SidebarChat from './SidebarChat';
 import db from './firebase';
+import { useStateValue } from './StateProvider';
 
-function Sidebar() {
+function Sidebar(props) {
     const [rooms, setRooms] = useState([]);
+    const [{ user }, dispatch] = useStateValue();
 
     useEffect(() => {
-        db.collection('rooms').onSnapshot(snapshot => setRooms(
+        const unsubscribe = db.collection('rooms').onSnapshot(snapshot => setRooms(
             snapshot.docs.map(doc => ({
                 id: doc.id,
                 data: doc.data()
             }))
-        ))
+        ));
+
+        return () => {
+            unsubscribe();
+        }
     }, []);
 
     return (
         <div className="sidebar">
             <div className="sidebar__header">
-                <Avatar />   
+                <Avatar src={user?.photoURL} />   
                 <div className="sidebar__headerRight">
                     <IconButton>
                         <DonutLarge />
